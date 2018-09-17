@@ -8,11 +8,13 @@ Sentinel is an autonomous agent for persisting, processing and automating Chainc
 
 Sentinel is implemented as a Python application that binds to a local version 0.16.x chaincoind instance on each Chaincoin V0.16 Masternode.
 
-This guide covers installing Sentinel onto an existing 0.16.x Masternode in Ubuntu 14.04 / 16.04.
+This guide covers installing Sentinel onto an existing 0.16.x Masternode in Ubuntu 14.04 / 16.04 and Windows.
 
 ## Installation
 
 ### 1. Install Prerequisites
+
+#### Ubuntu
 
 Make sure Python version 2.7.x or above is installed:
 
@@ -26,8 +28,20 @@ Update system packages and ensure virtualenv is installed:
 Make sure the local Chaincoin daemon running is at least version 0.16.x
 
     $ chaincoin-cli getnetworkinfo | grep version
+	
+#### Windows
+
+Make sure Python version 2.7.15 or above is installed and added to PATH environment variable:
+
+    python --version
+
+Ensure virtualenv is installed:
+
+    pip install virtualenv
 
 ### 2. Install Sentinel
+
+#### Ubuntu
 
 Clone the Sentinel repo and install Python dependencies:
 
@@ -38,6 +52,16 @@ When just upgrading, also remove the virtual environment:
     
     $ git pull
     $ rm -rf venv && virtualenv ./venv && ./venv/bin/pip install -r requirements.txt
+
+#### Windows
+
+Download Sentinel repo and extract to folder:
+
+    https://github.com/chaincoin/sentinel/archive/master.zip
+
+Install Python dependencies, open command prompt in sentinel folder:
+
+    virtualenv venv && venv\Scripts\pip install -r requirements.txt
 
 ### 3. Configuration
 
@@ -50,7 +74,9 @@ Connection details have to be specified in `sentinel.conf`:
 
 It is recommended use rpcauth for the RPC connection: https://github.com/chaincoin/chaincoin/tree/master/share/rpcauth
 
-### 4. Set up Cron
+### 4. Set up Scheduler
+
+#### Ubuntu - Cron
 
 Set up a crontab entry to call Sentinel every minute:
 
@@ -60,13 +86,31 @@ In the crontab editor, add the lines below, replacing '/home/YOURUSERNAME/sentin
 
     * * * * * cd /home/YOURUSERNAME/sentinel && ./venv/bin/python bin/sentinel.py >/dev/null 2>&1
 
+#### Windows - Task Scheduler
+
+Set up a windows task to run every minute:
+
+    Program/script: venv\Scripts\python
+    arguments: bin\sentinel.py
+    start in: %sentinel folder% 
+
 ### 5. Test the Installation
+
+#### Ubuntu
 
 Test the config by runnings all tests from the sentinel folder you cloned into
 
     $ ./venv/bin/py.test ./test
 
 With all tests passing and crontab setup, Sentinel will stay in sync with chaincoind and the installation is complete
+
+#### Windows
+
+Test the config by runnings all tests from the sentinel folder you cloned into
+
+    venv\Scripts\py.test test
+
+With all tests passing and windows task setup, Sentinel will stay in sync with chaincoind and the installation is complete
 
 ## Troubleshooting
 
