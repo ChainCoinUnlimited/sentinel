@@ -41,7 +41,11 @@ class ChaincoinDaemon():
         return self(**creds)
 
     def rpc_command(self, *params):
-        return self.rpc_connection.__getattr__(params[0])(*params[1:])
+        try:
+            return self.rpc_connection.__getattr__(params[0])(*params[1:])
+        except Exception as e:
+            if ( (e[0] == "Method not found") and (params[0] == "getgovernanceinfo")):
+                return self.rpc_connection.__getattr__("getfundinginfo")(*params[1:])
 
     # common RPC convenience methods
     def get_masternodes(self):
@@ -57,7 +61,7 @@ class ChaincoinDaemon():
             status = self.rpc_command('masternode', 'status')
             mn_outpoint = status.get('outpoint') or status.get('vin')
             my_vin = parse_masternode_status_vin(mn_outpoint)
-        except JSONRPCException as e:
+        except Exception as e:
             pass
 
         return my_vin
@@ -74,7 +78,11 @@ class ChaincoinDaemon():
     @property
     def govinfo(self):
         if (not self.governance_info):
-            self.governance_info = self.rpc_command('getgovernanceinfo')
+            try:
+                return self.rpc_command('getgovernanceinfo')
+            except Exception as e:
+                if ( (e[0] == "Method not found") ):
+                    return self.rpc_command('getfundinginfo')
         return self.governance_info
 
     # governance info convenience methods
